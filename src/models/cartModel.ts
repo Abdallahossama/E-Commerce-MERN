@@ -3,7 +3,7 @@ import { Iproduct } from "./productModel";
 
 let cartStatusEnum = ["active", "completed"];
 
-interface IcartItem extends Document {
+interface IcartItem {
   product: Iproduct;
   unitPrice: number;
   quantity: number;
