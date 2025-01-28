@@ -33,28 +33,69 @@ export const addItemToCart = async ({
   const cart = await getcart({ userId });
 
   const existsInCart = cart.items.find((p) => {
-    return p.product.toString() === productId    
+    return p.product.toString() === productId;
   });
   if (existsInCart) {
     return { data: "item already in cart", statusCode: 400 };
   }
   const product = await productModule.findById(productId);
   if (!product) return { data: "Product not found!", status: 400 };
-  if (product.stock < parseInt(quantity)){
+  if (product.stock < parseInt(quantity)) {
     return { data: `Only ${product.stock}  items available`, statusCode: 400 };
   }
-    cart.items.push({
-      product: productId,
-      unitPrice: product.price,
-      quantity: parseInt(quantity),
-    });
+  cart.items.push({
+    product: productId,
+    unitPrice: product.price,
+    quantity: parseInt(quantity),
+  });
   cart.totalPrice += parseInt(quantity) * product.price;
   product.stock -= parseInt(quantity);
-  await product.save()
+  await product.save();
   const updatedCart = await cart.save();
   return { data: updatedCart, statusCode: 201 };
 };
+interface cartUpdate {
+  userId: string;
+  productId: any;
+  quantity: string;
+}
+export const updateItemInCart = async ({
+  userId,
+  productId,
+  quantity,
+}: cartUpdate) => {
+  const cart = await getcart({ userId });
 
-// export const productExists = ({ userId, productId, quantity }:) => {
-  
-// };
+  const existsInCart = cart.items.find((p) => {
+    return p.product.toString() === productId;
+  });
+  if (!existsInCart) {
+    return { data: "item is not in the cart cart", statusCode: 400 };
+  }
+
+  const product = await productModule.findById(productId);
+  if (product!.stock < parseInt(quantity)) {
+    return {
+      data: `Only ${product!.stock}  items available`,
+      statusCode: 400,
+    };
+  }
+  existsInCart.quantity = parseInt(quantity);
+  const restItemsInTheCart = cart.items.filter((p) => {
+    return p.product.toString() != productId;
+  });
+
+  let total = restItemsInTheCart.reduce((sum, product) => {
+    return (sum += product.quantity * product.unitPrice);
+  }, 0);
+
+  total += existsInCart.unitPrice * existsInCart.quantity;
+
+  cart.totalPrice = total;
+
+  const newCart = await cart.save();
+  return {
+    data: newCart,
+    statusCode: 200,
+  };
+};
