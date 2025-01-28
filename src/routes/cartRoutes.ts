@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import {
   addItemToCart,
+  clearCart,
   deleteItemFromCart,
   getcart,
   updateItemInCart,
@@ -27,6 +28,7 @@ cartRouter.post("/items", validateJWT, async (req: userRequest, res) => {
   });
   res.status(statusCode!).send(data);
 });
+
 cartRouter.put("/items", validateJWT, async (req: userRequest, res) => {
   const userId = req.user._id;
   const { productId, quantity } = req.body;
@@ -37,6 +39,7 @@ cartRouter.put("/items", validateJWT, async (req: userRequest, res) => {
   });
   res.status(statusCode).send(data);
 });
+
 cartRouter.delete(
   "/items/:productId",
   validateJWT,
@@ -46,6 +49,17 @@ cartRouter.delete(
     const { data, statusCode } = await deleteItemFromCart({
       userId,
       productId,
+    });
+    res.status(statusCode).send(data);
+  }
+);
+cartRouter.delete(
+  "/items/",
+  validateJWT,
+  async (req: userRequest, res) => {
+    const userId = req.user._id;
+    const { data, statusCode } = await clearCart({
+      userId,
     });
     res.status(statusCode).send(data);
   }

@@ -131,3 +131,17 @@ export const deleteItemFromCart = async ({ userId, productId }: deleteItem) => {
     statusCode: 200,
   };
 };
+interface deleteAllItems {
+  userId: string;
+}
+export const clearCart = async ({ userId }: deleteAllItems) => {
+  const cart = await getcart({ userId });
+  cart.items = [];
+  cart.totalPrice = 0;
+
+  const newCart = await cart.save();
+  return {
+    data: newCart,
+    statusCode: 200,
+  };
+};
