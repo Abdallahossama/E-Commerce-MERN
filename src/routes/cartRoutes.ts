@@ -1,5 +1,10 @@
 import express, { Request, Response } from "express";
-import { addItemToCart, getcart, updateItemInCart } from "../services/cartServices";
+import {
+  addItemToCart,
+  deleteItemFromCart,
+  getcart,
+  updateItemInCart,
+} from "../services/cartServices";
 import validateJWT from "../middlewares/validateJWT";
 const cartRouter = express.Router();
 interface userRequest extends Request {
@@ -15,7 +20,11 @@ cartRouter.get("/", validateJWT, async (req: userRequest, res) => {
 cartRouter.post("/items", validateJWT, async (req: userRequest, res) => {
   const userId = req.user._id;
   const { productId, quantity } = req.body;
-  const {data,statusCode} = await addItemToCart({ userId, productId, quantity });
+  const { data, statusCode } = await addItemToCart({
+    userId,
+    productId,
+    quantity,
+  });
   res.status(statusCode!).send(data);
 });
 cartRouter.put("/items", validateJWT, async (req: userRequest, res) => {
@@ -28,5 +37,18 @@ cartRouter.put("/items", validateJWT, async (req: userRequest, res) => {
   });
   res.status(statusCode).send(data);
 });
+cartRouter.delete(
+  "/items/:productId",
+  validateJWT,
+  async (req: userRequest, res) => {
+    const userId = req.user._id;
+    const { productId } = req.params;
+    const { data, statusCode } = await deleteItemFromCart({
+      userId,
+      productId,
+    });
+    res.status(statusCode).send(data);
+  }
+);
 
 export default cartRouter;

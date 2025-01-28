@@ -99,3 +99,35 @@ export const updateItemInCart = async ({
     statusCode: 200,
   };
 };
+interface deleteItem {
+  userId: string;
+  productId: any;
+}
+export const deleteItemFromCart = async ({ userId, productId }: deleteItem) => {
+  const cart = await getcart({ userId });
+
+  const existsInCart = cart.items.find((p) => {
+    return p.product.toString() === productId;
+  });
+
+  if (!existsInCart) {
+    return { data: "item is not in the cart cart", statusCode: 400 };
+  }
+
+  const restItemsInTheCart = cart.items.filter((p) => {
+    return p.product.toString() != productId;
+  });
+
+  let total = restItemsInTheCart.reduce((sum, product) => {
+    return (sum += product.quantity * product.unitPrice);
+  }, 0);
+
+  cart.items = restItemsInTheCart;
+  cart.totalPrice = total;
+
+  const newCart = await cart.save();
+  return {
+    data: newCart,
+    statusCode: 200,
+  };
+};

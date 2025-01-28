@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel";
 
-interface userRequest extends Request{
-  user?:any
+interface userRequest extends Request {
+  user?: any;
 }
 
 const validateJWT = (req: userRequest, res: Response, next: NextFunction) => {
@@ -40,7 +40,7 @@ const validateJWT = (req: userRequest, res: Response, next: NextFunction) => {
       const user = await userModel.findOne({ email: userPayload.email });
 
       req.user = user?._id;
-      next()
+      next();
     }
   );
 };
