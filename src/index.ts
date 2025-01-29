@@ -1,7 +1,9 @@
+import dontenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import routes from "./routes/routes";
 
+dontenv.config()
 const app = express();
 const port = 2000;
 
@@ -10,7 +12,7 @@ app.use(express.json());
 
 // MongoDB connection
 mongoose
-  .connect("mongodb://localhost:27017/ecommerce")
+  .connect(process.env.DATABASE_URL||'')
   .then(() => {
     console.log("Connected to MongoDB");
   })
