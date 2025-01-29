@@ -1,12 +1,15 @@
-import express, { Request, Response } from "express";
+import express, { Request } from "express";
 import {
   addItemToCart,
   clearCart,
   deleteItemFromCart,
   getcart,
+  orderCheckout,
   updateItemInCart,
 } from "../services/cartServices";
 import validateJWT from "../middlewares/validateJWT";
+import orderModel from "../models/orderModel";
+
 const cartRouter = express.Router();
 interface userRequest extends Request {
   user?: any;
@@ -53,16 +56,20 @@ cartRouter.delete(
     res.status(statusCode).send(data);
   }
 );
-cartRouter.delete(
-  "/items/",
-  validateJWT,
-  async (req: userRequest, res) => {
-    const userId = req.user._id;
-    const { data, statusCode } = await clearCart({
-      userId,
-    });
-    res.status(statusCode).send(data);
-  }
-);
+
+cartRouter.delete("/items/", validateJWT, async (req: userRequest, res) => {
+  const userId = req.user._id;
+  const { data, statusCode } = await clearCart({
+    userId,
+  });
+  res.status(statusCode).send(data);
+});
+
+cartRouter.post("/checkout", validateJWT, async (req: userRequest, res) => {
+  const userId = req.user._id;
+  const address = req.body.address;
+  const { data, statusCode } = await orderCheckout({ userId, address });
+  res.status(statusCode).send(data);
+});
 
 export default cartRouter;

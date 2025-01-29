@@ -1,4 +1,5 @@
 import cartModel from "../models/cartModel";
+import orderModel, { IorderItem } from "../models/orderModel";
 import productModule from "../models/productModel";
 
 interface createCartForUser {
@@ -49,8 +50,6 @@ export const addItemToCart = async ({
     quantity: parseInt(quantity),
   });
   cart.totalPrice += parseInt(quantity) * product.price;
-  product.stock -= parseInt(quantity);
-  await product.save();
   const updatedCart = await cart.save();
   return { data: updatedCart, statusCode: 201 };
 };
@@ -142,6 +141,67 @@ export const clearCart = async ({ userId }: deleteAllItems) => {
   const newCart = await cart.save();
   return {
     data: newCart,
+    statusCode: 200,
+  };
+};
+interface orderCheckout {
+  userId: string;
+  address: string;
+}
+export const orderCheckout = async ({ userId, address }: orderCheckout) => {
+  const cart = await getcart({ userId });
+  if (cart.items.length === 0) {
+    return {
+      data: "no items in the cart",
+      statusCode: 400,
+    };
+  }
+  const orderItems: IorderItem[] = [];
+
+  for (const cartItem of cart.items) {
+    let product = await productModule.findById(cartItem.product);
+    if (!product) {
+      return {
+        data: "product not found!",
+        statusCode: 400,
+      };
+    }
+    orderItems.push({
+      productTitle: product?.title,
+      productImage: product?.image,
+      unitPrice: product?.price,
+      quantity: cartItem.quantity,
+    });
+  }
+
+  const newOrder = await new orderModel({
+    orderItems: orderItems,
+    totalPrice: cart.totalPrice,
+    address,
+  });
+  if (!newOrder) {
+    return {
+      data: "somthing went wrong while creating order!",
+      statusCode: 400,
+    };
+  }
+
+  const orderDone = await newOrder.save();
+  if (!orderDone) {
+    return {
+      data: "somthing went wrong while saving the order",
+      statusCode: 400,
+    };
+  }
+  for (const cartItem of cart.items) {
+    let product = await productModule.findById(cartItem.product);
+    product!.stock -= cartItem.quantity;
+    await product!.save();
+  }
+  cart.status = "completed";
+  await cart!.save();
+  return {
+    data: orderDone,
     statusCode: 200,
   };
 };
