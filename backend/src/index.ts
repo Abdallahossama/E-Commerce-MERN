@@ -2,17 +2,19 @@ import dontenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import routes from "./routes/routes";
+import cors from "cors";
 
-dontenv.config()
+dontenv.config();
 const app = express();
 const port = 2000;
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
 mongoose
-  .connect(process.env.DATABASE_URL||'')
+  .connect(process.env.DATABASE_URL || "")
   .then(() => {
     console.log("Connected to MongoDB");
   })
