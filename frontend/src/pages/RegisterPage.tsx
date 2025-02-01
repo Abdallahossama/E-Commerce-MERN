@@ -1,34 +1,44 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { BASE_URL } from "../constants/baseUrl";
+import { useAuth } from "../context/Auth/AuthContext";
 
 function RegisterPage() {
-  const fristName = useRef<HTMLInputElement>(null);
-  const lastName = useRef<HTMLInputElement>(null);
-  const email = useRef<HTMLInputElement>(null);
-  const password = useRef<HTMLInputElement>(null);
+  const fristNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
-
+  const { login } = useAuth();
   const onSubmit = async () => {
+    const firstName = fristNameRef.current?.value;
+    const lastName = lastNameRef.current?.value;
+    const email = emailRef.current?.value;
+    const password = passwordRef.current?.value;
+    if (!firstName || !lastName || !email || !password) {
+      setError("Data is not valid!");
+      return;
+    }
     const res = await fetch(`${BASE_URL}/user/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        firstName: fristName.current?.value,
-        lastName: lastName.current?.value,
-        email: email.current?.value,
-        password: password.current?.value,
+        firstName,
+        lastName,
+        email,
+        password,
       }),
     });
     if (!res.ok) {
-            const data = await res.json();
-      setError(data);
+      const token = await res.json();
+      setError(token);
       return;
     }
-    const data = await res.json();
-    console.log(data);
+    const token = await res.json();
+    console.log(token);
+    login(email, token);
     setError("");
   };
 
@@ -59,17 +69,21 @@ function RegisterPage() {
           }}
         >
           <TextField
-            inputRef={fristName}
+            inputRef={fristNameRef}
             label={"Frist Name"}
             name="fristName"
           ></TextField>
           <TextField
-            inputRef={lastName}
+            inputRef={lastNameRef}
             label={"Last Name"}
             name="lastName"
           ></TextField>
-          <TextField inputRef={email} label={"Email"} name="email"></TextField>
-          <TextField inputRef={password} label="Password" type="password" />
+          <TextField
+            inputRef={emailRef}
+            label={"Email"}
+            name="email"
+          ></TextField>
+          <TextField inputRef={passwordRef} label="Password" type="password" />
           <Button onClick={onSubmit} variant="contained">
             sign up
           </Button>

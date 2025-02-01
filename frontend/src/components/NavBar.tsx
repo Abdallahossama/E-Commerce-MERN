@@ -47,7 +47,7 @@ function ResponsiveAppBar() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            Teck Hub
           </Typography>
 
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
@@ -67,7 +67,7 @@ function ResponsiveAppBar() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            Teck Hub
           </Typography>
 
           <Box sx={{ flexGrow: 0 }}>
