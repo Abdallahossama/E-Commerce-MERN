@@ -32,7 +32,7 @@ export const register = async ({
   } catch (error) {
     console.error(error);
     return {
-      data: "An error occurred during registration.",
+      data: "An error occurred during registration make sure your data is valid!.",
       status: 500,
     };
   }

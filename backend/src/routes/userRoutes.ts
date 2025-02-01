@@ -12,7 +12,7 @@ userRoutes.post("/register", async (req, res) => {
       email,
       password,
     });
-    res.status(status).send(data);
+    res.status(status).json(data);
   } catch (error) {
     res.status(500).json({ message: "Error registering user", error });
   }
