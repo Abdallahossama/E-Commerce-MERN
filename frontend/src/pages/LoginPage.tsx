@@ -4,45 +4,51 @@ import { BASE_URL } from "../constants/baseUrl";
 import { useAuth } from "../context/Auth/AuthContext";
 import { useNavigate } from "react-router";
 
-function RegisterPage() {
-  const fristNameRef = useRef<HTMLInputElement>(null);
-  const lastNameRef = useRef<HTMLInputElement>(null);
+function LoginPage() {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
+  const navigate = useNavigate()
   const { login } = useAuth();
-    const navigate = useNavigate();
   const onSubmit = async () => {
-    const firstName = fristNameRef.current?.value;
-    const lastName = lastNameRef.current?.value;
     const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
-    if (!firstName || !lastName || !email || !password) {
+    if (!email || !password) {
       setError("Data is not valid!");
       return;
     }
-    const res = await fetch(`${BASE_URL}/user/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        password,
-      }),
-    });
-    if (!res.ok) {
-      const token = await res.json();
-      setError(token);
-      return;
-    }
-    const token = await res.json();
-    console.log(token);
-    login(email, token);
-    navigate("/");
-    setError("");
+const res = await fetch(`${BASE_URL}/user/login`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    email,
+    password,
+  }),
+});
+
+if (!res.ok) {
+  try {
+    const err = await res.text(); // Try parsing error response as JSON
+    setError(err || "Login failed!");
+  } catch {
+    setError("An unexpected error occurred!");
+  }
+  return;
+}
+
+const token = await res.text(); // Use text() for token if successful
+
+if (!token) {
+  setError("Something went wrong!");
+  return;
+}
+
+login(email, token);
+navigate('/')
+setError("");
+
   };
 
   return (
@@ -56,7 +62,7 @@ function RegisterPage() {
         }}
       >
         <Typography variant="h5" sx={{ mt: "30px" }}>
-          Register Page
+          Login to Your Account
         </Typography>
         <Box
           sx={{
@@ -72,23 +78,13 @@ function RegisterPage() {
           }}
         >
           <TextField
-            inputRef={fristNameRef}
-            label={"Frist Name"}
-            name="fristName"
-          ></TextField>
-          <TextField
-            inputRef={lastNameRef}
-            label={"Last Name"}
-            name="lastName"
-          ></TextField>
-          <TextField
             inputRef={emailRef}
             label={"Email"}
             name="email"
           ></TextField>
           <TextField inputRef={passwordRef} label="Password" type="password" />
           <Button onClick={onSubmit} variant="contained">
-            sign up
+            Login Page
           </Button>
           {error && <Typography sx={{ color: "red" }}>{error}</Typography>}
         </Box>
@@ -96,4 +92,4 @@ function RegisterPage() {
     </Container>
   );
 }
-export default RegisterPage;
+export default LoginPage;
